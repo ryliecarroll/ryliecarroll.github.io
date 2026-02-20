@@ -26,6 +26,7 @@ body {
     flex-direction: column;
     align-items: center;
     height: 100vh;
+    transition: transform 0.2s ease;
 }
 
 /* Top-left title */
@@ -192,8 +193,8 @@ model-viewer {
     gap: 10px;
     width: 100%;
     max-width: 400px;
-    padding: 10px 0; /* spacing above and below underline */
-    border-bottom: 1px solid #fff; /* underline under items */
+    padding: 10px 0; 
+    border-bottom: 1px solid #fff;
 }
 
 .cart-item {
@@ -230,7 +231,7 @@ model-viewer {
 
 /* Subtotal */
 #cart-subtotal {
-    margin: 10px 0 20px 0; /* spacing between underline and subtotal matches spacing above underline */
+    margin: 10px 0 20px 0;
     font-size: 1.2rem;
     font-weight: bold;
 }
@@ -267,7 +268,7 @@ model-viewer {
     z-index: 25;
     background: none;
     border: none;
-    opacity: 0.4; /* 40% transparency */
+    opacity: 0.4;
     transition: opacity 0.2s ease;
 }
 
@@ -283,16 +284,16 @@ model-viewer {
     right: 20px;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-    .main-display {
-        flex-direction: column;
-        align-items: center;
-        gap: 25px;
+/* Mobile scaling */
+@media (max-width: 600px) {
+    body {
+        transform: scale(0.6);
+        transform-origin: top center;
+        width: 166.6667vw; /* counteracts shrinking */
+        overflow-y: auto;
     }
-
-    .product-info {
-        margin-top: 0;
+    .wheel-container {
+        --wheel-size: 432px; /* 720 * 0.6 */
     }
 }
 </style>
@@ -340,7 +341,7 @@ model-viewer {
 let hats = hatsData;
 let totalItems = hats.length;
 let anglePerItem = 360 / totalItems;
-let radius = window.innerWidth <= 600 ? 240 : 360;
+let radius = window.innerWidth <= 600 ? 144 : 360; // scaled
 let floatOffset = 60;
 let currentIndex = 0;
 let currentRotation = 0;
