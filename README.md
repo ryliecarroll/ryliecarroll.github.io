@@ -1,2 +1,0 @@
-# ryliecarroll.github.io
-zishou
