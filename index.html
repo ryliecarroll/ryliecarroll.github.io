@@ -25,8 +25,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* FIX: Use dynamic viewport height (dvh) so mobile nav bars don't cut off the bottom */
     height: 100vh;
-    touch-action: none;
+    height: 100dvh; 
+    /* FIX: Removed 'touch-action: none' from body so the cart overlay can scroll */
 }
 
 #site-title {
@@ -111,6 +113,8 @@ model-viewer {
     width: var(--wheel-size);
     height: var(--wheel-size);
     z-index: 5;
+    /* FIX: Keep swipe handling localized to the wheel so it doesn't break UI elsewhere */
+    touch-action: none; 
 }
 
 .wheel {
@@ -289,7 +293,8 @@ model-viewer {
 
 @media (max-width: 600px) {
     :root {
-        --wheel-size: 340px; 
+        /* FIX: Prevents wheel from overflowing screen edges on very small devices (e.g. iPhone SE) */
+        --wheel-size: min(340px, 95vw); 
     }
 
     #site-title {
@@ -301,7 +306,7 @@ model-viewer {
     }
 
     .main-display {
-        margin-top: 18vh;
+        margin-top: 15vh;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -312,8 +317,8 @@ model-viewer {
     }
 
     .model-container {
-        width: 130px;
-        height: 130px;
+        width: 150px;
+        height: 150px;
     }
 
     .product-info {
@@ -324,22 +329,22 @@ model-viewer {
     }
 
     .product-title {
-        font-size: 1rem;
+        font-size: 1.1rem;
         margin-bottom: 4px;
     }
 
     .product-price {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         margin-bottom: 4px;
     }
 
     .product-description {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         margin-bottom: 10px;
     }
 
     .buy-btn {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
 
     .wheel-container {
@@ -354,7 +359,7 @@ model-viewer {
     }
 
     .arrow-btn {
-        top: 50%;
+        top: 45%;
         font-size: 1.5rem;
         padding: 10px; 
     }
@@ -366,7 +371,6 @@ model-viewer {
         bottom: 10px; 
     }
 
-    /* MOBILE CART FIX - CENTERED */
     #cart-overlay {
         padding: 20px;
         justify-content: flex-start;
@@ -451,13 +455,13 @@ model-viewer {
 
 <script src="hats.js"></script>
 <script>
-let hats = hatsData;
+let hats = typeof hatsData !== 'undefined' ? hatsData : []; // Safety fallback
 let totalItems = hats.length;
-let anglePerItem = 360 / totalItems;
+let anglePerItem = totalItems > 0 ? 360 / totalItems : 0;
 let isMobile = window.innerWidth <= 600;
 
-let radius = isMobile ? 170 : 360; 
-let floatOffset = isMobile ? 0 : 60; 
+let radius;
+let floatOffset;
 
 let currentIndex = 0;
 let currentRotation = 0;
@@ -479,18 +483,23 @@ const cartSubtotal = document.getElementById('cart-subtotal');
 const leftArrow = document.getElementById('left-arrow');
 const rightArrow = document.getElementById('right-arrow');
 
+// FIX: Automatically calculate radius based on actual CSS container width
+function updateDimensions() {
+    const wheelContainer = document.querySelector('.wheel-container');
+    radius = wheelContainer.offsetWidth / 2;
+    floatOffset = window.innerWidth <= 600 ? 0 : 60;
+}
+
 window.addEventListener('resize', () => {
     let newIsMobile = window.innerWidth <= 600;
-    if (newIsMobile !== isMobile) {
-        isMobile = newIsMobile;
-        radius = isMobile ? 170 : 360;
-        floatOffset = isMobile ? 0 : 60;
-        wheel.innerHTML = ''; 
-        initWheel(); 
-    }
+    // Update immediately to handle viewport orientation shifts smoothly
+    isMobile = newIsMobile;
+    updateDimensions();
+    initWheel();
 });
 
 function generateMediaHTML(hat, isMain) {
+    if (!hat) return '';
     if (hat.type === "3d") {
         const controls = isMain ? "camera-controls auto-rotate" : "";
         return `<model-viewer src="${hat.src}" ${controls} shadow-intensity="1" alt="${hat.name}"></model-viewer>`;
@@ -500,6 +509,11 @@ function generateMediaHTML(hat, isMain) {
 }
 
 function initWheel() {
+    if (totalItems === 0) return;
+    
+    updateDimensions();
+    wheel.innerHTML = ''; 
+
     hats.forEach((hat, index) => {
         const item = document.createElement('div');
         item.className = 'wheel-item';
@@ -508,10 +522,11 @@ function initWheel() {
         const itemAngle = index * anglePerItem;
         const scale = index === currentIndex ? 'scale(1.4)' : 'scale(1)';
 
+        // FIX: Added currentRotation to initial transform so items don't flip upside down when resizing the window
         item.style.transform = `
             rotate(${itemAngle}deg)
             translateY(-${radius + floatOffset}px)
-            rotate(-${itemAngle}deg)
+            rotate(-${itemAngle + currentRotation}deg) 
             ${scale}
         `;
 
@@ -529,6 +544,8 @@ function initWheel() {
 }
 
 function rotateWheel(direction) {
+    if (totalItems === 0) return;
+    
     currentIndex -= direction;
     if (currentIndex < 0) currentIndex = totalItems - 1;
     if (currentIndex >= totalItems) currentIndex = 0;
@@ -556,6 +573,7 @@ function rotateWheel(direction) {
 }
 
 function updateUI() {
+    if (totalItems === 0) return;
     const activeHat = hats[currentIndex];
 
     mainModel.style.opacity = '0';
@@ -572,6 +590,7 @@ function updateUI() {
 }
 
 function addToCart() {
+    if (totalItems === 0) return;
     const activeHat = hats[currentIndex];
     cart.push(activeHat);
     alert(`${activeHat.name} added to cart`);
@@ -631,11 +650,14 @@ window.addEventListener('wheel', (e) => {
 let touchStartX = 0;
 let touchEndX = 0;
 
+// FIX: Ignore swipes inside the cart overlay so users can actually scroll their cart
 window.addEventListener('touchstart', e => {
+    if (e.target.closest('#cart-overlay')) return; 
     touchStartX = e.changedTouches[0].screenX;
-});
+}, { passive: true });
 
 window.addEventListener('touchend', e => {
+    if (e.target.closest('#cart-overlay')) return;
     touchEndX = e.changedTouches[0].screenX;
     handleSwipe();
 });
