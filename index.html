@@ -299,7 +299,7 @@ model-viewer {
 /* Mobile Responsive */
 @media (max-width: 600px) {
     :root {
-        --wheel-size: 340px; /* Scaled down to fit screen width perfectly */
+        --wheel-size: 340px; 
     }
     
     #site-title {
@@ -311,51 +311,49 @@ model-viewer {
     }
 
     .main-display {
-        margin-top: 15vh;
-        flex-direction: row !important; /* Forces side-by-side */
-        flex-wrap: nowrap;
+        margin-top: 18vh;
+        flex-direction: row; /* Ensure side-by-side */
         align-items: center;
         justify-content: center;
         width: 100%;
-        padding: 0 20px;
+        padding: 0 45px; /* Added padding so it avoids the arrows */
         box-sizing: border-box;
-        gap: 15px; /* Space between model and text */
+        gap: 15px; 
     }
 
     .model-container {
-        width: 140px;
-        height: 140px;
-        flex: 0 0 140px; /* Prevents model container from shrinking/growing */
+        width: 130px;
+        height: 130px;
+        flex: 0 0 130px; 
     }
 
     .product-info {
-        flex: 1 1 auto; /* Takes up remaining space on right */
+        flex: 1; 
         align-items: flex-start;
         text-align: left;
         margin-top: 0;
     }
 
     .product-title {
-        font-size: 1.1rem;
-        margin-bottom: 5px;
+        font-size: 1rem;
+        margin-bottom: 4px;
     }
 
     .product-price {
-        font-size: 0.9rem;
-        margin-bottom: 5px;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
     }
 
     .product-description {
-        font-size: 0.8rem;
-        margin-bottom: 12px;
+        font-size: 0.75rem;
+        margin-bottom: 10px;
     }
 
     .buy-btn {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
     .wheel-container {
-        /* Center of wheel sits 60px above the bottom of the screen */
         bottom: calc((var(--wheel-size) / -2) + 60px); 
     }
 
@@ -367,14 +365,15 @@ model-viewer {
     }
 
     .arrow-btn {
-        top: auto;
-        bottom: 130px; 
+        top: 50%; /* Resets arrow to middle of screen */
+        bottom: auto;
+        transform: translateY(-50%);
         font-size: 1.5rem;
         padding: 10px; 
     }
 
-    #left-arrow { left: 5px; }
-    #right-arrow { right: 5px; }
+    #left-arrow { left: 10px; }
+    #right-arrow { right: 10px; }
     
     .hint {
         bottom: 10px; 
