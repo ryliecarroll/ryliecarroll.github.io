@@ -291,7 +291,7 @@ model-viewer {
     :root {
         --wheel-size: 340px; 
     }
-    
+
     #site-title {
         font-size: 1.2rem;
     }
@@ -302,11 +302,11 @@ model-viewer {
 
     .main-display {
         margin-top: 18vh;
-        flex-direction: row;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         width: 100%;
-        padding: 0 45px;
+        padding: 0 15px;
         box-sizing: border-box;
         gap: 15px; 
     }
@@ -314,14 +314,13 @@ model-viewer {
     .model-container {
         width: 130px;
         height: 130px;
-        flex: 0 0 130px; 
     }
 
     .product-info {
-        flex: 1; 
-        align-items: flex-start;
-        text-align: left;
-        margin-top: 0;
+        flex: unset;
+        align-items: center;
+        text-align: center;
+        margin-top: 10px;
     }
 
     .product-title {
@@ -356,29 +355,27 @@ model-viewer {
 
     .arrow-btn {
         top: 50%;
-        bottom: auto;
-        transform: translateY(-50%);
         font-size: 1.5rem;
         padding: 10px; 
     }
 
     #left-arrow { left: 10px; }
     #right-arrow { right: 10px; }
-    
+
     .hint {
         bottom: 10px; 
     }
 
-    /* Mobile Cart Fix */
+    /* MOBILE CART FIX - CENTERED */
     #cart-overlay {
-        padding: 10px;
+        padding: 20px;
         justify-content: flex-start;
-        align-items: stretch;
+        align-items: center;
         overflow-y: auto;
     }
 
     #cart-items {
-        max-width: 100%;
+        max-width: 90%;
         width: 100%;
         padding: 5px 0;
         gap: 8px;
@@ -387,7 +384,7 @@ model-viewer {
     .cart-item {
         font-size: 0.85rem;
         justify-content: space-between;
-        flex-wrap: wrap;
+        width: 100%;
     }
 
     .cart-remove-btn {
@@ -396,12 +393,16 @@ model-viewer {
 
     #cart-subtotal {
         font-size: 1rem;
+        text-align: center;
+        margin-top: 10px;
     }
 
     .cart-actions {
         flex-direction: column;
         gap: 10px;
-        width: 100%;
+        width: 90%;
+        align-items: center;
+        margin-top: 10px;
     }
 
     .cart-actions button {
@@ -449,7 +450,6 @@ model-viewer {
 <div class="hint">Scroll, swipe, or click to rotate</div>
 
 <script src="hats.js"></script>
-
 <script>
 let hats = hatsData;
 let totalItems = hats.length;
