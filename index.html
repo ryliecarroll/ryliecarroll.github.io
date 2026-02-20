@@ -21,7 +21,7 @@ body {
     background: var(--bg-color);
     color: var(--text-color);
     font-family: Arial, Helvetica, sans-serif;
-    overflow-x: hidden;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -192,8 +192,8 @@ model-viewer {
     gap: 10px;
     width: 100%;
     max-width: 400px;
-    padding: 10px 0; 
-    border-bottom: 1px solid #fff;
+    padding: 10px 0; /* spacing above and below underline */
+    border-bottom: 1px solid #fff; /* underline under items */
 }
 
 .cart-item {
@@ -207,6 +207,7 @@ model-viewer {
     margin-right: 5px;
 }
 
+/* Remove X button */
 .cart-remove-btn {
     background: none;
     border: none;
@@ -227,12 +228,14 @@ model-viewer {
     text-align: center;
 }
 
+/* Subtotal */
 #cart-subtotal {
-    margin: 10px 0 20px 0;
+    margin: 10px 0 20px 0; /* spacing between underline and subtotal matches spacing above underline */
     font-size: 1.2rem;
     font-weight: bold;
 }
 
+/* Checkout and Close buttons side by side */
 .cart-actions {
     display: flex;
     gap: 20px;
@@ -251,6 +254,7 @@ model-viewer {
     opacity: 0.6;
 }
 
+/* Arrow controls */
 .arrow-btn {
     position: fixed;
     top: 50%;
@@ -263,7 +267,7 @@ model-viewer {
     z-index: 25;
     background: none;
     border: none;
-    opacity: 0.4;
+    opacity: 0.4; /* 40% transparency */
     transition: opacity 0.2s ease;
 }
 
@@ -279,65 +283,16 @@ model-viewer {
     right: 20px;
 }
 
-/* Mobile-specific layout */
-@media (max-width: 600px) {
+/* Responsive */
+@media (max-width: 900px) {
     .main-display {
         flex-direction: column;
         align-items: center;
-        gap: 20px;
-        margin-top: 10vh;
+        gap: 25px;
     }
 
     .product-info {
         margin-top: 0;
-        text-align: center;
-    }
-
-    .model-container {
-        width: 220px;
-        height: 220px;
-    }
-
-    .wheel-container {
-        --wheel-size: 360px;
-        bottom: calc(var(--wheel-size) / -2.2);
-        width: var(--wheel-size);
-        height: var(--wheel-size);
-    }
-
-    .wheel-item {
-        width: 50px;
-        height: 50px;
-        margin-top: -25px;
-        margin-left: -25px;
-    }
-
-    .product-title {
-        font-size: 1.3rem;
-    }
-
-    .product-price {
-        font-size: 0.95rem;
-    }
-
-    .product-description {
-        font-size: 0.85rem;
-    }
-
-    .buy-btn {
-        font-size: 0.85rem;
-    }
-
-    #cart-button {
-        font-size: 1.7rem;
-    }
-
-    .arrow-btn {
-        font-size: 1.5rem;
-    }
-
-    .hint {
-        font-size: 0.65rem;
     }
 }
 </style>
@@ -348,6 +303,7 @@ model-viewer {
 <div id="site-title">紫兽</div>
 <div id="cart-button">+</div>
 
+<!-- Arrow buttons -->
 <button class="arrow-btn" id="left-arrow">&#8592;</button>
 <button class="arrow-btn" id="right-arrow">&#8594;</button>
 
@@ -379,12 +335,12 @@ model-viewer {
 <div class="hint">Scroll, swipe, or click to rotate</div>
 
 <script src="hats.js"></script>
+
 <script>
-// Your original JavaScript stays mostly the same, just adjust radius for mobile:
 let hats = hatsData;
 let totalItems = hats.length;
 let anglePerItem = 360 / totalItems;
-let radius = window.innerWidth <= 600 ? 140 : 360;
+let radius = window.innerWidth <= 600 ? 240 : 360;
 let floatOffset = 60;
 let currentIndex = 0;
 let currentRotation = 0;
@@ -415,7 +371,142 @@ function generateMediaHTML(hat, isMain) {
     }
 }
 
-// ...keep the rest of your wheel, cart, and rotation JS the same...
+function initWheel() {
+    hats.forEach((hat, index) => {
+        const item = document.createElement('div');
+        item.className = 'wheel-item';
+        item.innerHTML = generateMediaHTML(hat, false);
+
+        const itemAngle = index * anglePerItem;
+        const scale = index === currentIndex ? 'scale(1.4)' : 'scale(1)';
+
+        item.style.transform = `
+            rotate(${itemAngle}deg)
+            translateY(-${radius + floatOffset}px)
+            rotate(-${itemAngle}deg)
+            ${scale}
+        `;
+
+        if (index === currentIndex) item.classList.add('active');
+
+        item.addEventListener('click', () => {
+            const diff = index - currentIndex;
+            rotateWheel(-diff);
+        });
+
+        wheel.appendChild(item);
+    });
+
+    updateUI();
+}
+
+function rotateWheel(direction) {
+    currentIndex -= direction;
+    if (currentIndex < 0) currentIndex = totalItems - 1;
+    if (currentIndex >= totalItems) currentIndex = 0;
+
+    currentRotation += direction * anglePerItem;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    const items = document.querySelectorAll('.wheel-item');
+
+    items.forEach((item, index) => {
+        const itemAngle = index * anglePerItem;
+        const scale = index === currentIndex ? 'scale(1.4)' : 'scale(1)';
+
+        item.style.transform = `
+            rotate(${itemAngle}deg)
+            translateY(-${radius + floatOffset}px)
+            rotate(-${itemAngle + currentRotation}deg)
+            ${scale}
+        `;
+
+        item.classList.toggle('active', index === currentIndex);
+    });
+
+    updateUI();
+}
+
+function updateUI() {
+    const activeHat = hats[currentIndex];
+
+    mainModel.style.opacity = '0';
+    mainModel.style.transform = 'scale(0.96)';
+
+    setTimeout(() => {
+        mainModel.innerHTML = generateMediaHTML(activeHat, true);
+        productTitle.innerText = activeHat.name;
+        productPrice.innerText = activeHat.price;
+        productDescription.innerText = activeHat.description;
+        mainModel.style.opacity = '1';
+        mainModel.style.transform = 'scale(1)';
+    }, 150);
+}
+
+// Cart functions
+function addToCart() {
+    const activeHat = hats[currentIndex];
+    cart.push(activeHat);
+    alert(`${activeHat.name} added to cart`);
+}
+
+cartButton.addEventListener('click', () => {
+    cartOverlay.style.display = 'flex';
+    renderCart();
+});
+
+function closeCart() {
+    cartOverlay.style.display = 'none';
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+
+function renderCart() {
+    cartItems.innerHTML = '';
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<div>Your cart is empty</div>';
+        cartSubtotal.innerText = 'Subtotal: $0.00';
+        return;
+    }
+
+    let subtotal = 0;
+
+    cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `<span class="cart-item-text">${item.name} - ${item.price}</span><button class="cart-remove-btn" onclick="removeFromCart(${index})">X</button>`;
+        cartItems.appendChild(div);
+
+        const priceNum = parseFloat(item.price.replace(/[^0-9.-]+/g,"")) || 0;
+        subtotal += priceNum;
+    });
+
+    cartSubtotal.innerText = `Subtotal: $${subtotal.toFixed(2)}`;
+}
+
+function goToCheckout() {
+    alert('Proceeding to checkout');
+}
+
+// Wheel scroll
+window.addEventListener('wheel', (e) => {
+    if (isScrolling) return;
+    isScrolling = true;
+
+    if (e.deltaY > 0) rotateWheel(-1);
+    else rotateWheel(1);
+
+    setTimeout(() => { isScrolling = false; }, 600);
+});
+
+// Arrow button events
+leftArrow.addEventListener('click', () => rotateWheel(1));
+rightArrow.addEventListener('click', () => rotateWheel(-1));
+
+initWheel();
 </script>
 
 </body>
