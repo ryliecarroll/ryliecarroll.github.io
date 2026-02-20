@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ZISHOU</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 
@@ -26,6 +26,7 @@ body {
     flex-direction: column;
     align-items: center;
     height: 100vh;
+    touch-action: none; /* Prevents pull-to-refresh on mobile */
 }
 
 /* Top-left title */
@@ -154,6 +155,8 @@ model-viewer {
     font-size: 0.75rem;
     opacity: 0.6;
     pointer-events: none;
+    text-align: center;
+    width: 100%;
 }
 
 /* Cart button and overlay */
@@ -192,8 +195,8 @@ model-viewer {
     gap: 10px;
     width: 100%;
     max-width: 400px;
-    padding: 10px 0; /* spacing above and below underline */
-    border-bottom: 1px solid #fff; /* underline under items */
+    padding: 10px 0;
+    border-bottom: 1px solid #fff;
 }
 
 .cart-item {
@@ -207,7 +210,6 @@ model-viewer {
     margin-right: 5px;
 }
 
-/* Remove X button */
 .cart-remove-btn {
     background: none;
     border: none;
@@ -228,14 +230,12 @@ model-viewer {
     text-align: center;
 }
 
-/* Subtotal */
 #cart-subtotal {
-    margin: 10px 0 20px 0; /* spacing between underline and subtotal matches spacing above underline */
+    margin: 10px 0 20px 0; 
     font-size: 1.2rem;
     font-weight: bold;
 }
 
-/* Checkout and Close buttons side by side */
 .cart-actions {
     display: flex;
     gap: 20px;
@@ -267,7 +267,7 @@ model-viewer {
     z-index: 25;
     background: none;
     border: none;
-    opacity: 0.4; /* 40% transparency */
+    opacity: 0.4;
     transition: opacity 0.2s ease;
 }
 
@@ -283,7 +283,7 @@ model-viewer {
     right: 20px;
 }
 
-/* Responsive */
+/* Tablet Responsive */
 @media (max-width: 900px) {
     .main-display {
         flex-direction: column;
@@ -295,6 +295,63 @@ model-viewer {
         margin-top: 0;
     }
 }
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    :root {
+        --wheel-size: 500px;
+    }
+    
+    #site-title {
+        font-size: 1.2rem;
+    }
+
+    #cart-button {
+        font-size: 1.5rem;
+    }
+
+    .main-display {
+        margin-top: 80px;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .model-container {
+        width: 220px;
+        height: 220px;
+    }
+
+    .product-info {
+        align-items: center;
+        text-align: center;
+        z-index: 20; 
+    }
+
+    .product-title {
+        font-size: 1.3rem;
+    }
+
+    .wheel-container {
+        bottom: calc((var(--wheel-size) / -2) - 10px);
+    }
+
+    .wheel-item {
+        width: 50px;
+        height: 50px;
+        margin-top: -25px;
+        margin-left: -25px;
+    }
+
+    .arrow-btn {
+        top: auto;
+        bottom: 120px; /* Moves arrows to flank the top curve of the wheel */
+        font-size: 1.5rem;
+        padding: 15px; /* Bigger touch target */
+    }
+
+    #left-arrow { left: 10px; }
+    #right-arrow { right: 10px; }
+}
 </style>
 </head>
 
@@ -303,7 +360,6 @@ model-viewer {
 <div id="site-title">紫兽</div>
 <div id="cart-button">+</div>
 
-<!-- Arrow buttons -->
 <button class="arrow-btn" id="left-arrow">&#8592;</button>
 <button class="arrow-btn" id="right-arrow">&#8594;</button>
 
@@ -340,8 +396,9 @@ model-viewer {
 let hats = hatsData;
 let totalItems = hats.length;
 let anglePerItem = 360 / totalItems;
-let radius = window.innerWidth <= 600 ? 240 : 360;
-let floatOffset = 60;
+let isMobile = window.innerWidth <= 600;
+let radius = isMobile ? 220 : 360; 
+let floatOffset = isMobile ? 40 : 60;
 let currentIndex = 0;
 let currentRotation = 0;
 let isScrolling = false;
@@ -361,6 +418,18 @@ const cartSubtotal = document.getElementById('cart-subtotal');
 
 const leftArrow = document.getElementById('left-arrow');
 const rightArrow = document.getElementById('right-arrow');
+
+// Handle Window Resize for wheel radius
+window.addEventListener('resize', () => {
+    let newIsMobile = window.innerWidth <= 600;
+    if (newIsMobile !== isMobile) {
+        isMobile = newIsMobile;
+        radius = isMobile ? 220 : 360;
+        floatOffset = isMobile ? 40 : 60;
+        wheel.innerHTML = ''; 
+        initWheel(); // Re-render wheel items with new radius
+    }
+});
 
 function generateMediaHTML(hat, isMain) {
     if (hat.type === "3d") {
@@ -491,7 +560,7 @@ function goToCheckout() {
     alert('Proceeding to checkout');
 }
 
-// Wheel scroll
+// Wheel scroll (Desktop)
 window.addEventListener('wheel', (e) => {
     if (isScrolling) return;
     isScrolling = true;
@@ -501,6 +570,29 @@ window.addEventListener('wheel', (e) => {
 
     setTimeout(() => { isScrolling = false; }, 600);
 });
+
+// Touch Swipe events (Mobile)
+let touchStartX = 0;
+let touchEndX = 0;
+
+window.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+window.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    if (touchEndX < touchStartX - swipeThreshold) {
+        rotateWheel(-1); // Swipe left
+    }
+    if (touchEndX > touchStartX + swipeThreshold) {
+        rotateWheel(1);  // Swipe right
+    }
+}
 
 // Arrow button events
 leftArrow.addEventListener('click', () => rotateWheel(1));
