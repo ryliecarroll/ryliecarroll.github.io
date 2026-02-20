@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZISHOU</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+
+<style>
+:root {
+    --bg-color: #000;
+    --text-color: #fff;
+    --wheel-size: 720px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Top-left title */
+#site-title {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    z-index: 20;
+}
+
+/* Main display */
+.main-display {
+    margin-top: 11vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 50px;
+    z-index: 10;
+}
+
+/* Preview */
+.model-container {
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Product info */
+.product-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 95px; 
+}
+
+.product-title {
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+}
+
+.product-price {
+    font-size: 1rem;
+    margin: 0 0 10px 0;
+}
+
+.product-description {
+    font-size: 0.9rem;
+    margin: 0 0 18px 0;
+    color: #ccc;
+}
+
+.buy-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    padding: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.buy-btn:hover {
+    opacity: 0.6;
+}
+
+model-viewer {
+    width: 100%;
+    height: 100%;
+    --poster-color: transparent;
+}
+
+/* Wheel */
+.wheel-container {
+    position: fixed;
+    bottom: calc(var(--wheel-size) / -2);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--wheel-size);
+    height: var(--wheel-size);
+    z-index: 5;
+}
+
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1px solid #fff;
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 0.4;
+}
+
+.wheel-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    margin-top: -35px;
+    margin-left: -35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+}
+
+.wheel-item.active {
+    opacity: 1;
+}
+
+/* Scroll hint */
+.hint {
+    position: fixed;
+    bottom: 18px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Cart button and overlay */
+#cart-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    font-size: 2rem;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 20;
+    user-select: none;
+}
+
+#cart-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    color: #fff;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    padding: 20px;
+}
+
+#cart-items {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;    
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 0; /* spacing above and below underline */
+    border-bottom: 1px solid #fff; /* underline under items */
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    font-size: 1rem;
+}
+
+.cart-item-text {
+    margin-right: 5px;
+}
+
+/* Remove X button */
+.cart-remove-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: "Times New Roman", serif;
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.cart-remove-btn:hover {
+    color: purple;
+}
+
+#cart-overlay h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Subtotal */
+#cart-subtotal {
+    margin: 10px 0 20px 0; /* spacing between underline and subtotal matches spacing above underline */
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Checkout and Close buttons side by side */
+.cart-actions {
+    display: flex;
+    gap: 20px;
+}
+
+.cart-actions button {
+    background: none;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.cart-actions button:hover {
+    opacity: 0.6;
+}
+
+/* Arrow controls */
+.arrow-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    z-index: 25;
+    background: none;
+    border: none;
+    opacity: 0.4; /* 40% transparency */
+    transition: opacity 0.2s ease;
+}
+
+.arrow-btn:hover {
+    opacity: 1;
+}
+
+#left-arrow {
+    left: 20px;
+}
+
+#right-arrow {
+    right: 20px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .main-display {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+    }
+
+    .product-info {
+        margin-top: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="site-title">紫兽</div>
+<div id="cart-button">+</div>
+
+<!-- Arrow buttons -->
+<button class="arrow-btn" id="left-arrow">&#8592;</button>
+<button class="arrow-btn" id="right-arrow">&#8594;</button>
+
+<div id="cart-overlay">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <div id="cart-subtotal">Subtotal: $0.00</div>
+    <div class="cart-actions">
+        <button class="checkout-btn" onclick="goToCheckout()">Go to Checkout</button>
+        <button class="close-btn" onclick="closeCart()">Close</button>
+    </div>
+</div>
+
+<div class="main-display">
+    <div class="model-container" id="main-model"></div>
+
+    <div class="product-info">
+        <h1 class="product-title" id="product-title">Loading</h1>
+        <p class="product-price" id="product-price">Please wait</p>
+        <p class="product-description" id="product-description"></p>
+        <button class="buy-btn" onclick="addToCart()">Add to Cart</button>
+    </div>
+</div>
+
+<div class="wheel-container">
+    <div class="wheel" id="wheel"></div>
+</div>
+
+<div class="hint">Scroll, swipe, or click to rotate</div>
+
+<script src="hats.js"></script>
+
+<script>
+let hats = hatsData;
+let totalItems = hats.length;
+let anglePerItem = 360 / totalItems;
+let radius = window.innerWidth <= 600 ? 240 : 360;
+let floatOffset = 60;
+let currentIndex = 0;
+let currentRotation = 0;
+let isScrolling = false;
+
+let cart = [];
+
+const wheel = document.getElementById('wheel');
+const mainModel = document.getElementById('main-model');
+const productTitle = document.getElementById('product-title');
+const productPrice = document.getElementById('product-price');
+const productDescription = document.getElementById('product-description');
+
+const cartButton = document.getElementById('cart-button');
+const cartOverlay = document.getElementById('cart-overlay');
+const cartItems = document.getElementById('cart-items');
+const cartSubtotal = document.getElementById('cart-subtotal');
+
+const leftArrow = document.getElementById('left-arrow');
+const rightArrow = document.getElementById('right-arrow');
+
+function generateMediaHTML(hat, isMain) {
+    if (hat.type === "3d") {
+        const controls = isMain ? "camera-controls auto-rotate" : "";
+        return `<model-viewer src="${hat.src}" ${controls} shadow-intensity="1" alt="${hat.name}"></model-viewer>`;
+    } else {
+        return `<img src="${hat.src}" alt="${hat.name}" style="width:100%;height:100%;object-fit:contain;">`;
+    }
+}
+
+function initWheel() {
+    hats.forEach((hat, index) => {
+        const item = document.createElement('div');
+        item.className = 'wheel-item';
+        item.innerHTML = generateMediaHTML(hat, false);
+
+        const itemAngle = index * anglePerItem;
+        const scale = index === currentIndex ? 'scale(1.4)' : 'scale(1)';
+
+        item.style.transform = `
+            rotate(${itemAngle}deg)
+            translateY(-${radius + floatOffset}px)
+            rotate(-${itemAngle}deg)
+            ${scale}
+        `;
+
+        if (index === currentIndex) item.classList.add('active');
+
+        item.addEventListener('click', () => {
+            const diff = index - currentIndex;
+            rotateWheel(-diff);
+        });
+
+        wheel.appendChild(item);
+    });
+
+    updateUI();
+}
+
+function rotateWheel(direction) {
+    currentIndex -= direction;
+    if (currentIndex < 0) currentIndex = totalItems - 1;
+    if (currentIndex >= totalItems) currentIndex = 0;
+
+    currentRotation += direction * anglePerItem;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    const items = document.querySelectorAll('.wheel-item');
+
+    items.forEach((item, index) => {
+        const itemAngle = index * anglePerItem;
+        const scale = index === currentIndex ? 'scale(1.4)' : 'scale(1)';
+
+        item.style.transform = `
+            rotate(${itemAngle}deg)
+            translateY(-${radius + floatOffset}px)
+            rotate(-${itemAngle + currentRotation}deg)
+            ${scale}
+        `;
+
+        item.classList.toggle('active', index === currentIndex);
+    });
+
+    updateUI();
+}
+
+function updateUI() {
+    const activeHat = hats[currentIndex];
+
+    mainModel.style.opacity = '0';
+    mainModel.style.transform = 'scale(0.96)';
+
+    setTimeout(() => {
+        mainModel.innerHTML = generateMediaHTML(activeHat, true);
+        productTitle.innerText = activeHat.name;
+        productPrice.innerText = activeHat.price;
+        productDescription.innerText = activeHat.description;
+        mainModel.style.opacity = '1';
+        mainModel.style.transform = 'scale(1)';
+    }, 150);
+}
+
+// Cart functions
+function addToCart() {
+    const activeHat = hats[currentIndex];
+    cart.push(activeHat);
+    alert(`${activeHat.name} added to cart`);
+}
+
+cartButton.addEventListener('click', () => {
+    cartOverlay.style.display = 'flex';
+    renderCart();
+});
+
+function closeCart() {
+    cartOverlay.style.display = 'none';
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+
+function renderCart() {
+    cartItems.innerHTML = '';
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<div>Your cart is empty</div>';
+        cartSubtotal.innerText = 'Subtotal: $0.00';
+        return;
+    }
+
+    let subtotal = 0;
+
+    cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `<span class="cart-item-text">${item.name} - ${item.price}</span><button class="cart-remove-btn" onclick="removeFromCart(${index})">X</button>`;
+        cartItems.appendChild(div);
+
+        const priceNum = parseFloat(item.price.replace(/[^0-9.-]+/g,"")) || 0;
+        subtotal += priceNum;
+    });
+
+    cartSubtotal.innerText = `Subtotal: $${subtotal.toFixed(2)}`;
+}
+
+function goToCheckout() {
+    alert('Proceeding to checkout');
+}
+
+// Wheel scroll
+window.addEventListener('wheel', (e) => {
+    if (isScrolling) return;
+    isScrolling = true;
+
+    if (e.deltaY > 0) rotateWheel(-1);
+    else rotateWheel(1);
+
+    setTimeout(() => { isScrolling = false; }, 600);
+});
+
+// Arrow button events
+leftArrow.addEventListener('click', () => rotateWheel(1));
+rightArrow.addEventListener('click', () => rotateWheel(-1));
+
+initWheel();
+</script>
+
+</body>
+</html>
