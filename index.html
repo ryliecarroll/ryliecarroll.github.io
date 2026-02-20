@@ -299,7 +299,7 @@ model-viewer {
 /* Mobile Responsive */
 @media (max-width: 600px) {
     :root {
-        --wheel-size: 450px;
+        --wheel-size: 340px; /* Scaled down to fit screen width perfectly */
     }
     
     #site-title {
@@ -311,27 +311,27 @@ model-viewer {
     }
 
     .main-display {
-        margin-top: 90px;
-        gap: 15px;
-        width: 100%;
-        padding: 0 15px;
-        box-sizing: border-box;
-        flex-direction: row; /* Forces side-by-side layout again */
+        margin-top: 15vh;
+        flex-direction: row !important; /* Forces side-by-side */
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: center;
+        width: 100%;
+        padding: 0 20px;
+        box-sizing: border-box;
+        gap: 15px; /* Space between model and text */
     }
 
     .model-container {
-        width: 160px;
-        height: 160px;
-        flex-shrink: 0;
+        width: 140px;
+        height: 140px;
+        flex: 0 0 140px; /* Prevents model container from shrinking/growing */
     }
 
     .product-info {
+        flex: 1 1 auto; /* Takes up remaining space on right */
         align-items: flex-start;
         text-align: left;
-        z-index: 20; 
-        flex: 1;
         margin-top: 0;
     }
 
@@ -355,29 +355,29 @@ model-viewer {
     }
 
     .wheel-container {
-        /* Lifts the wheel up so it doesn't get cut off at the bottom */
-        bottom: calc((var(--wheel-size) / -2) + 30px);
+        /* Center of wheel sits 60px above the bottom of the screen */
+        bottom: calc((var(--wheel-size) / -2) + 60px); 
     }
 
     .wheel-item {
-        width: 50px;
-        height: 50px;
-        margin-top: -25px;
-        margin-left: -25px;
+        width: 40px;
+        height: 40px;
+        margin-top: -20px;
+        margin-left: -20px;
     }
 
     .arrow-btn {
         top: auto;
-        bottom: 150px;
+        bottom: 130px; 
         font-size: 1.5rem;
-        padding: 15px; 
+        padding: 10px; 
     }
 
-    #left-arrow { left: 10px; }
-    #right-arrow { right: 10px; }
+    #left-arrow { left: 5px; }
+    #right-arrow { right: 5px; }
     
     .hint {
-        bottom: 8px; /* Drop the hint lower since the wheel moved up */
+        bottom: 10px; 
     }
 }
 </style>
@@ -425,8 +425,11 @@ let hats = hatsData;
 let totalItems = hats.length;
 let anglePerItem = 360 / totalItems;
 let isMobile = window.innerWidth <= 600;
-let radius = isMobile ? 190 : 360; 
-let floatOffset = isMobile ? 35 : 60;
+
+// Set radius exactly to half of the new --wheel-size (340 / 2)
+let radius = isMobile ? 170 : 360; 
+let floatOffset = isMobile ? 0 : 60; 
+
 let currentIndex = 0;
 let currentRotation = 0;
 let isScrolling = false;
@@ -447,13 +450,13 @@ const cartSubtotal = document.getElementById('cart-subtotal');
 const leftArrow = document.getElementById('left-arrow');
 const rightArrow = document.getElementById('right-arrow');
 
-// Handle Window Resize for wheel radius
+// Handle Window Resize
 window.addEventListener('resize', () => {
     let newIsMobile = window.innerWidth <= 600;
     if (newIsMobile !== isMobile) {
         isMobile = newIsMobile;
-        radius = isMobile ? 190 : 360;
-        floatOffset = isMobile ? 35 : 60;
+        radius = isMobile ? 170 : 360;
+        floatOffset = isMobile ? 0 : 60;
         wheel.innerHTML = ''; 
         initWheel(); 
     }
