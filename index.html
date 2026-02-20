@@ -29,7 +29,6 @@ body {
     touch-action: none;
 }
 
-/* Top-left title */
 #site-title {
     position: fixed;
     top: 20px;
@@ -40,7 +39,6 @@ body {
     z-index: 20;
 }
 
-/* Main display */
 .main-display {
     margin-top: 11vh;
     display: flex;
@@ -50,7 +48,6 @@ body {
     z-index: 10;
 }
 
-/* Preview */
 .model-container {
     width: 300px;
     height: 300px;
@@ -60,7 +57,6 @@ body {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Product info */
 .product-info {
     display: flex;
     flex-direction: column;
@@ -107,7 +103,6 @@ model-viewer {
     --poster-color: transparent;
 }
 
-/* Wheel */
 .wheel-container {
     position: fixed;
     bottom: calc(var(--wheel-size) / -2);
@@ -148,7 +143,6 @@ model-viewer {
     opacity: 1;
 }
 
-/* Scroll hint */
 .hint {
     position: fixed;
     bottom: 18px;
@@ -159,7 +153,6 @@ model-viewer {
     width: 100%;
 }
 
-/* Cart button and overlay */
 #cart-button {
     position: fixed;
     top: 20px;
@@ -254,7 +247,6 @@ model-viewer {
     opacity: 0.6;
 }
 
-/* Arrow controls */
 .arrow-btn {
     position: fixed;
     top: 50%;
@@ -283,7 +275,6 @@ model-viewer {
     right: 20px;
 }
 
-/* Tablet Responsive */
 @media (max-width: 900px) {
     .main-display {
         flex-direction: column;
@@ -296,7 +287,6 @@ model-viewer {
     }
 }
 
-/* Mobile Responsive */
 @media (max-width: 600px) {
     :root {
         --wheel-size: 340px; 
@@ -312,11 +302,11 @@ model-viewer {
 
     .main-display {
         margin-top: 18vh;
-        flex-direction: row; /* Ensure side-by-side */
+        flex-direction: row;
         align-items: center;
         justify-content: center;
         width: 100%;
-        padding: 0 45px; /* Added padding so it avoids the arrows */
+        padding: 0 45px;
         box-sizing: border-box;
         gap: 15px; 
     }
@@ -365,7 +355,7 @@ model-viewer {
     }
 
     .arrow-btn {
-        top: 50%; /* Resets arrow to middle of screen */
+        top: 50%;
         bottom: auto;
         transform: translateY(-50%);
         font-size: 1.5rem;
@@ -377,6 +367,47 @@ model-viewer {
     
     .hint {
         bottom: 10px; 
+    }
+
+    /* Mobile Cart Fix */
+    #cart-overlay {
+        padding: 10px;
+        justify-content: flex-start;
+        align-items: stretch;
+        overflow-y: auto;
+    }
+
+    #cart-items {
+        max-width: 100%;
+        width: 100%;
+        padding: 5px 0;
+        gap: 8px;
+    }
+
+    .cart-item {
+        font-size: 0.85rem;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .cart-remove-btn {
+        font-size: 0.75rem;
+    }
+
+    #cart-subtotal {
+        font-size: 1rem;
+    }
+
+    .cart-actions {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .cart-actions button {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 8px 0;
     }
 }
 </style>
@@ -425,7 +456,6 @@ let totalItems = hats.length;
 let anglePerItem = 360 / totalItems;
 let isMobile = window.innerWidth <= 600;
 
-// Set radius exactly to half of the new --wheel-size (340 / 2)
 let radius = isMobile ? 170 : 360; 
 let floatOffset = isMobile ? 0 : 60; 
 
@@ -449,7 +479,6 @@ const cartSubtotal = document.getElementById('cart-subtotal');
 const leftArrow = document.getElementById('left-arrow');
 const rightArrow = document.getElementById('right-arrow');
 
-// Handle Window Resize
 window.addEventListener('resize', () => {
     let newIsMobile = window.innerWidth <= 600;
     if (newIsMobile !== isMobile) {
@@ -542,7 +571,6 @@ function updateUI() {
     }, 150);
 }
 
-// Cart functions
 function addToCart() {
     const activeHat = hats[currentIndex];
     cart.push(activeHat);
@@ -590,7 +618,6 @@ function goToCheckout() {
     alert('Proceeding to checkout');
 }
 
-// Wheel scroll (Desktop)
 window.addEventListener('wheel', (e) => {
     if (isScrolling) return;
     isScrolling = true;
@@ -601,7 +628,6 @@ window.addEventListener('wheel', (e) => {
     setTimeout(() => { isScrolling = false; }, 600);
 });
 
-// Touch Swipe events (Mobile)
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -617,14 +643,13 @@ window.addEventListener('touchend', e => {
 function handleSwipe() {
     const swipeThreshold = 50;
     if (touchEndX < touchStartX - swipeThreshold) {
-        rotateWheel(-1); // Swipe left
+        rotateWheel(-1);
     }
     if (touchEndX > touchStartX + swipeThreshold) {
-        rotateWheel(1);  // Swipe right
+        rotateWheel(1);
     }
 }
 
-// Arrow button events
 leftArrow.addEventListener('click', () => rotateWheel(1));
 rightArrow.addEventListener('click', () => rotateWheel(-1));
 
