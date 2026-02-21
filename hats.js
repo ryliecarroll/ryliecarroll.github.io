@@ -3,8 +3,8 @@ const hatsData = [
         "id": 0,
         "name": "Roof Jesus",
         "price": "$70.00",
-        "type": "3d",
-        "src": "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
+        "type": "image",
+        "src": "roofjesus.png",
         "description": "100% Cotton"
     },
     {
@@ -71,4 +71,5 @@ const hatsData = [
         "src": "https://placehold.co/200x200/222/FFF?text=zishou",
         "description": "100% Polyester"
     },
+
 ];
